@@ -4,6 +4,7 @@ import winsound
 import xmltodict
 import asyncio
 import aiohttp
+import traceback
 from pprint import pprint
 import dateutil.parser
 import numpy as np
@@ -80,6 +81,7 @@ class LiveT:
                 pprint(self.key_list)
         # if for whatever reason we run into an error, print all the data out
         except:
+            traceback.print_exc()
             print("************ ERROR ENCOUNTERED WHILE PROCESSING STREAM, PRINTING FULL RESPONSE ************")
             pprint(data)
 
