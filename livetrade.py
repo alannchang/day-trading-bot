@@ -7,7 +7,6 @@ import aiohttp
 import traceback
 from pprint import pprint
 import dateutil.parser
-import numpy as np
 from pandas import pandas as pd
 from stream import TdStreamerClient
 from config import C_KEY, ACCT_NUM, REFRESH
@@ -71,6 +70,8 @@ class LiveT:
                 symbol = parsed_data['Order']['Security']['Symbol']
                 if ordertype != "Market":
                     price = parsed_data['Order']['OrderPricing'][f'{ordertype}']
+                else:
+                    price = "MARKET"
                 # if "Order" in the title, crop "Order" to be concise
                 if "Order" in activity:
                     activity = activity[5:]
