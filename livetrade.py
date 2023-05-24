@@ -102,7 +102,8 @@ class LiveT:
         # If Stop Order canceled and number of keys in Limit Sell set equal to SIZE - 1
         if activity == "UROUT" and ordertype == "Stop" and orderinstruct == "Sell" and SIZE == len(self.key_list[-1]['Limit']['Sell']) + 1:
             new_stop_price = str(round((float(price) * 1.35), 1)) + "0"
-            for key in self.key_list[-1]['Stop']['Sell']:
+            # iterate thru a copy of the Stop Sell keys to avoid 'runtime error: set changed size during iteration'
+            for key in self.key_list[-1]['Stop']['Sell'].copy():
                 self.replace_order(key, new_stop_price, symbol)
                 # Remove order key from key list
                 self.key_list[-1]['Stop']['Sell'].discard(key)
