@@ -77,7 +77,8 @@ class LiveT:
                 # print a beautiful one line summary
                 print(f"{datetime.now()}: {activity} {ordertype} {orderinstruct} to {openclose} {symbol} @ {price} ({orderkey})")
                 # store order keys in most recent set of keys and print
-                self.process_key(activity, ordertype, orderinstruct, orderkey, price, symbol)
+                if len(self.key_list) > 0:
+                    self.process_key(activity, ordertype, orderinstruct, orderkey, price, symbol)
                 pprint(self.key_list)
         # if for whatever reason we run into an error, print all the data out
         except:
