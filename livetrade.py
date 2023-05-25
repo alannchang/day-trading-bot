@@ -93,10 +93,10 @@ class LiveT:
         if activity in ["Fill", "CancelRequest"]:  # process fills or canceled orders
             # If Limit Buy filled, "Go-go-go!"
             if activity == "Fill" and ordertype == "Limit" and orderinstruct == "Buy":
-                winsound.PlaySound('sound/bought.wav', winsound.SND_FILENAME)
+                winsound.PlaySound('sound/bought.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
             # If Limit Sell filled, "CHA-CHING!" $$$
             if activity == "Fill" and ordertype == "Limit" and orderinstruct == "Sell":
-                winsound.PlaySound('sound/profit.wav', winsound.SND_FILENAME)
+                winsound.PlaySound('sound/profit.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
             # Remove order key from key list
             self.key_list[-1][ordertype][orderinstruct].discard(orderkey)
 
@@ -207,10 +207,10 @@ class LiveT:
         for status_code in status_list:
             if status_code == 201:
                 print(f"{datetime.now()} | ENTRY ORDER PLACED!")
-                winsound.PlaySound('sound/entry.wav', winsound.SND_FILENAME)
+                winsound.PlaySound('sound/entry.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
             else:
                 print(f"{datetime.now()} | ENTRY ORDER FAILED TO PLACE!")
-                winsound.PlaySound('sound/codec.wav', winsound.SND_FILENAME)
+                winsound.PlaySound('sound/codec.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
         # create a new set of keys
         self.key_list.append(self.template)
         # add symbol for future reference
@@ -241,10 +241,10 @@ class LiveT:
         order_response = requests.put(url=f"{PO_ENDPOINT}/{orderkey}", headers=self.header, json=order_json)
         if 200 <= order_response.status_code < 300:
             print(f"{datetime.now()} | ********** MOVING SL TO {stop_price} **********")
-            winsound.PlaySound('sound/stoplossup.wav', winsound.SND_FILENAME)
+            winsound.PlaySound('sound/stoplossup.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
         else:
             print(f"{datetime.now()} | ********** {order_response.status_code}: FAILED TO REPLACE ORDER {orderkey} **********")
-            winsound.PlaySound('sound/codec.wav', winsound.SND_FILENAME)
+            winsound.PlaySound('sound/codec.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
 
     # replace stop orders to market sells to quickly exit position
     def replace_order_market(self, orderkey, symbol):
@@ -268,19 +268,19 @@ class LiveT:
         order_response = requests.put(url=f"{PO_ENDPOINT}/{orderkey}", headers=self.header, json=order_json)
         if 200 <= order_response.status_code < 300:
             print(f"{datetime.now()} | ********** REPLACING SL ORDER {orderkey} WITH MARKET SELL ORDER **********")
-            winsound.PlaySound('sound/stoplossup.wav', winsound.SND_FILENAME)
+            winsound.PlaySound('sound/stoplossup.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
         else:
             print(f"{datetime.now()} | ********** {order_response.status_code}: FAILED TO REPLACE ORDER {orderkey} **********")
-            winsound.PlaySound('sound/codec.wav', winsound.SND_FILENAME)
+            winsound.PlaySound('sound/codec.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
 
     def cancel_order(self, orderkey):
         order_response = requests.delete(url=f"{PO_ENDPOINT}/{orderkey}", headers=self.header)
         if 200 <= order_response.status_code < 300:
             print(f"{datetime.now()} | ********** SUCCESSFULLY CANCELED ORDER {orderkey} **********")
-            winsound.PlaySound('sound/dodged.wav', winsound.SND_FILENAME)
+            winsound.PlaySound('sound/dodged.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
         else:
             print(f"{datetime.now()} | ********** {order_response.status_code}: FAILED TO CANCEL ORDER {orderkey} **********")
-            winsound.PlaySound('sound/codec.wav', winsound.SND_FILENAME)
+            winsound.PlaySound('sound/codec.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
 
     async def alert_trace(self, title, desc):
 
