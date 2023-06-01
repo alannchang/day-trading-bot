@@ -97,8 +97,9 @@ class LiveT:
             # If Limit Sell filled, "CHA-CHING!" $$$
             if activity == "Fill" and ordertype == "Limit" and orderinstruct == "Sell":
                 winsound.PlaySound('sound/profit.wav', winsound.SND_FILENAME | winsound.SND_ASYNC)
-            # Remove order key from key list
-            self.key_list[-1][ordertype][orderinstruct].discard(orderkey)
+            # Remove order key from key list if not market order
+            if price != "MARKET":
+                self.key_list[-1][ordertype][orderinstruct].discard(orderkey)
 
         # If Stop Order canceled and number of keys in Limit Sell set equal to SIZE - 1
         if activity == "UROUT" and ordertype == "Stop" and orderinstruct == "Sell" and SIZE == len(self.key_list[-1]['Limit']['Sell']) + 1:
@@ -202,7 +203,7 @@ class LiveT:
             }
             self.json_list.append(order_json)
             self.endpoint_list.append(PO_ENDPOINT)
-        # After adding jsons and endpoints, send the requests asynchronously!
+        # After adding jsons and endpoints, send the requests asynchronously
         status_list = await self.send_requests(self.endpoint_list, self.header, self.json_list)
         for status_code in status_list:
             if status_code == 201:
