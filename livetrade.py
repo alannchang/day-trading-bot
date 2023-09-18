@@ -18,8 +18,8 @@ PO_ENDPOINT = f"https://api.tdameritrade.com/v1/accounts/{ACCT_NUM}/orders"
 
 # TRADE PARAMETERS
 SIZE = 2  # Number of contracts
-STOP_PRICE = .75  # SL at -25%
-SCALE = [1.15, 1.30, 1.60, 2.00, 2.50, 3.00]  # +15%, +30%, +60%, +100%, +150%, 200%
+STOP_PRICE = .70  # SL at -25%
+SCALE = [1.10, 1.20, 1.60, 2.00, 2.50, 3.00]  # +15%, +30%, +60%, +100%, +150%, 200%
 
 
 class LiveT:
@@ -136,12 +136,12 @@ class LiveT:
 
     async def enter_position(self, symbol, entryprice):
         # Set variables for SL, reformat entry price to string
-        stop_price = str(round((entryprice * STOP_PRICE), 1)) + "0"
+        stop_price = str(round((entryprice * STOP_PRICE), 2))
         entry_price = str("%.2f" % entryprice)
         # SIZE constant determines number of cons, iterates for each one
         for i in range(SIZE):
             # Using SCALE constant list, each request has a unique limit sell price
-            scale_price = str(round((entryprice * SCALE[i]), 1)) + "0"
+            scale_price = str(round((entryprice * SCALE[i]), 2))
             # BRACKET ORDER
             order_json = {
                 "orderType": "LIMIT",
@@ -285,46 +285,39 @@ class LiveT:
 
     async def alert_trace(self, title, desc):
 
-        if title == "ENTRY":
+        if "entering" in title.lower():
 
-            # ignore all lotto plays
-            if "lotto" in desc.lower():
-                print(f"{datetime.now()} | ********** IGNORING LOTTO **********")
+            # ignore all lotto/risky/swing plays
+            if "risky" in desc.lower() or "swing" in desc.lower() or "lotto" in desc.lower():
+                print(f"{datetime.now()} | ********** IGNORING RISKY/SWING/LOTTO PLAY **********")
                 return
+
+            arr = desc.split()
 
             # extract ticker
-            ticker = desc.split()[0]
-            if ticker == "$SPX":
+            for i in range(len(arr)):
+                if arr[i] == "Option:":
+                    ticker = arr[i + 1]
+                    strike = arr[i + 2]
+                    contract_type = arr[i + 3]
+                    expiry = arr[i + 4]
+
+                if arr[i] == "Entry:":
+                    if arr[i + 1][0] == "@" and arr[i + 1][1] == "$":
+                        entry_price = float(arr[i + 1][2:])
+                    else:
+                        entry_price = float(arr[i + 1])
+
+            if ticker == "SPX":
                 ticker = "SPXW"
 
-            # extract strike price
-            strike = desc.split()[1][:-1]
-
-            # extract contract type
-            if desc.split()[1][-1] == "c":
-                contract_type = "C"
-            elif desc.split()[1][-1] == "p":
-                contract_type = "P"
-            # if invalid for some reason, just abort
-            else:
-                return
-
             # set expiry to today (0DTE)
-            expiry = self.refresh_now.strftime("%m%d%y")
+            current_year = datetime.now().year
+            date_parts = expiry.split('/')
+            month = int(date_parts[0])
+            day = int(date_parts[1])
 
-            # extract entry price using position of decimal point
-            i = desc.index(".")
-            # if description doesn't cut off hundredths place
-            if len(desc) > i + 2:
-                # check if hundredths place exists
-                if desc[i + 2].isnumeric():
-                    # include it
-                    entry_price = float(desc[(i - 1):(i + 3)])
-                else:
-                    # exclude if it's not a number
-                    entry_price = float(desc[(i - 1):(i + 2)])
-            else:
-                entry_price = float(desc[(i - 1):(i + 2)])
+            expiry = "{:02d}{:02d}{:02d}".format(month, day, current_year % 100)
 
             # combine variables to create symbol
             symbol = f"{ticker}_{expiry}{contract_type}{strike}"
@@ -347,7 +340,6 @@ class LiveT:
             # if self.key_list:
             #     # slice last element off list
             #     self.key_list = self.key_list[:-1]
-
 
 # STREAMING DATA
 
@@ -414,9 +406,3 @@ class LiveT:
         row_dd = pd.DataFrame(new_entry)
         new_dd = pd.concat([df, row_dd], ignore_index=True)
         new_dd.to_csv("paperdata.csv", index=False)
-
-
-
-
-
-
